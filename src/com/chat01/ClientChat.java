@@ -11,17 +11,15 @@ import java.net.Socket;
 
 public class ClientChat extends JFrame {
     private JTextArea ta=new JTextArea(10,20);
-    private JScrollPane sp=new JScrollPane(ta);//glissant rouleau
+    private JScrollPane sp=new JScrollPane(ta);
     private JTextField tf=new JTextField(20);
+
     private static final String CONNSTR="127.0.0.1";
     private static final int CONNPORT=8888;
     private Socket s=null;
     private DataOutputStream dos=null;
     private boolean isConn=false;
     boolean isInitial=true;
-//public ClientChat() throws HeadlessException{
-//    super();
-//}
 
     public void init(){
         this.setTitle("fenêtre de client");
@@ -29,40 +27,39 @@ public class ClientChat extends JFrame {
         this.add(tf, BorderLayout.SOUTH);
         ta.append("Entrer votre pesudo:\n");
         this.setBounds(400,400,450,400);
-        tf.addActionListener(new ActionListener() {//la barre de saisie
+        tf.addActionListener(new ActionListener() {//associe des actions à la barre de saisie
             @Override
             public void actionPerformed(ActionEvent e) {
                 String strSend=tf.getText();
-                if(strSend.trim().length()==0) {//saisie de l'espace n'est pas possible!
+                if(strSend.trim().length()==0) {//saisie de l'espace nul n'est pas possible!
                     return;
                 }
                 if (isInitial==true){
-                    ta.append(tf.getText()+"\n");//第一次是昵称，要发给对方知道，但对方不能显示
+                    ta.append(tf.getText()+"\n");
                     ta.append(strSend+" a rejoint la conversation\n");
                     ta.append("----------------------------\n");
-                }//没输入名字前不能接消息
-//                ta.append(strSend+"\n");//多行显示，自己不显示昵称？？
+                }
                 send(strSend);
                 isInitial=false;
                 tf.setText("");//nettoye la barre de saisie
             }
         });
-
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ta.setEditable(false);
-        tf.requestFocus();//光标聚焦focalisation de souris
+        tf.requestFocus();
+        this.setVisible(true);//met en place la fenêtre graphique
 
         try {
-            s=new Socket(CONNSTR,CONNPORT);//lance le client
+            s=new Socket(CONNSTR,CONNPORT);//lance le participant
             isConn=true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.setVisible(true);
-
-        new Thread(new Receive()).start();//lancer le multiple一直收很多人的信息
+        new Thread(new Receive()).start();//lancer la recption de msg consécutive
     }
-//    envoyer
+
+
+    //    envoye le msgs au serveur
     public void send(String str){
         try {
             dos=new DataOutputStream(s.getOutputStream());
@@ -72,18 +69,18 @@ public class ClientChat extends JFrame {
         }
     }
 
-    //multiple recevoir
+
+    //    reçoit les msgs de la part d'autres participants
     class Receive implements Runnable{
         @Override
         public void run() {
-
             try {
-                while (isConn) {//continue à intercepter plusieurs messages de chaque client
+                while (isConn) {//intercepte msgs de chaque participant consécutivement
                 DataInputStream dis = new DataInputStream(s.getInputStream());
                 String str=dis.readUTF();
-                ta.append(str);//显示到窗口
+                ta.append(str);
             }
-            } catch (EOFException m){
+            } catch (EOFException m){//gére le cas d’une déconnexion de client sans que le client soit prévenu
                 System.out.println("le serveur est coupé accidentalement\n");
                 ta.append("le serveur est coupé accidentalement\n");
             }
@@ -95,7 +92,7 @@ public class ClientChat extends JFrame {
     }
     public static void main(String[] args) {
         ClientChat cc=new ClientChat();
-        cc.init();//main里调用
+        cc.init();//fait appel à clientchat
 
     }
 }
