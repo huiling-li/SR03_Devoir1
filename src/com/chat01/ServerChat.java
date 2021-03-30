@@ -1,3 +1,9 @@
+
+//        Created by Huiling LI.
+//        User: lihuiling
+//        Date: 26/03/2021
+//        Time: 17:09
+
 package com.chat01;
 import javax.swing.*;
 import java.awt.*;
